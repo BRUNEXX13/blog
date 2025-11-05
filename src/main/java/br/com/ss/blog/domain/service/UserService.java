@@ -2,6 +2,7 @@ package br.com.ss.blog.domain.service;
 
 import br.com.ss.blog.adapters.repository.UserRepository;
 import br.com.ss.blog.domain.dto.UserDTO;
+import br.com.ss.blog.domain.dto.UserUpdateDTO;
 import br.com.ss.blog.domain.entity.UserEntity;
 import br.com.ss.blog.domain.exception.EmailAlreadyExistsException;
 import br.com.ss.blog.infra.cache.CacheNames;
@@ -26,6 +27,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 @Service
 public class UserService {
@@ -55,6 +57,62 @@ public class UserService {
         log.info("User created successfully with ID {}", saved.getId());
         return userMapper.toDto(saved);
     }
+
+    @Transactional
+    @CacheEvict(value = CacheNames.USERS, allEntries = true) // Invalida todo o cache 'users' para garantir consistência
+    public UserDTO updateUser(@NotNull UUID id, @Valid @NotNull UserDTO dto) {
+        Objects.requireNonNull(dto, "UserDTO must not be null for update");
+
+        UserEntity existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+
+        // Verifica se o email está sendo alterado e se o novo email já existe para outro usuário
+        if (!existingUser.getEmail().equals(dto.email()) && userRepository.existsByEmail(dto.email())) {
+            throw new EmailAlreadyExistsException(dto.email());
+        }
+
+        // Atualiza os campos do usuário existente com os dados do DTO
+        existingUser.setFirstName(dto.firstName());
+        existingUser.setLastName(dto.lastName());
+        existingUser.setEmail(dto.email());
+        existingUser.setBirthDate(dto.birthDate());
+        // id e createdAt não são atualizados via DTO
+
+        UserEntity updatedUser = userRepository.save(existingUser);
+        log.info("User updated successfully with ID {}", updatedUser.getId());
+        return userMapper.toDto(updatedUser);
+    }
+
+    @Transactional
+    @CacheEvict(value = CacheNames.USERS, allEntries = true)
+    public UserDTO partialUpdateUser(@NotNull UUID id, @Valid @NotNull UserUpdateDTO dto) {
+        Objects.requireNonNull(dto, "UserUpdateDTO must not be null for partial update");
+
+        UserEntity existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+
+        updateIfValid(dto.firstName(), existingUser::setFirstName);
+        updateIfValid(dto.lastName(), existingUser::setLastName);
+        updateEmailIfValid(dto.email(), existingUser);
+        updateIfNotNull(dto.birthDate(), existingUser::setBirthDate);
+
+        UserEntity updatedUser = userRepository.save(existingUser);
+        log.info("User partially updated successfully with ID {}", updatedUser.getId());
+        return userMapper.toDto(updatedUser);
+    }
+
+    @Transactional
+    @CacheEvict(value = CacheNames.USERS, allEntries = true)
+    public void deleteUser(@NotNull UUID id) {
+        if (!userRepository.existsById(id)) {
+            log.warn("Attempted to delete non-existent user with ID: {}", id);
+            throw new UserNotFoundException(id);
+        }
+        userRepository.deleteById(id);
+        log.info("User with ID {} deleted successfully", id);
+    }
+
+
 
 
     @Transactional(readOnly = true)
@@ -103,5 +161,26 @@ public class UserService {
                     log.warn("User not found with email: {}", email);
                     return new UserNotFoundException(email);
                 });
+    }
+
+    private void updateIfValid(String field, Consumer<String> updater) {
+        if (field != null && !field.isBlank()) {
+            updater.accept(field);
+        }
+    }
+
+    private void updateEmailIfValid(String email, UserEntity user) {
+        if (email != null && !email.isBlank() && !user.getEmail().equals(email)) {
+            if (userRepository.existsByEmail(email)) {
+                throw new EmailAlreadyExistsException(email);
+            }
+            user.setEmail(email);
+        }
+    }
+
+    private <T> void updateIfNotNull(T value, Consumer<T> updater) {
+        if (value != null) {
+            updater.accept(value);
+        }
     }
 }

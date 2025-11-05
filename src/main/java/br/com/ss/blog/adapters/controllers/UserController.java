@@ -1,6 +1,7 @@
 package br.com.ss.blog.adapters.controllers;
 
 import br.com.ss.blog.domain.dto.UserDTO;
+import br.com.ss.blog.domain.dto.UserUpdateDTO;
 import br.com.ss.blog.infra.pageable.PaginatedResponse;
 import br.com.ss.blog.domain.service.UserService;
 import jakarta.validation.constraints.Email;
@@ -33,6 +34,25 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<UserDTO> updateUser(@PathVariable UUID id, @Valid @RequestBody UserDTO userDTO) {
+        UserDTO updatedUser = userService.updateUser(id, userDTO);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<UserDTO> partialUpdateUser(@PathVariable UUID id, @Valid @RequestBody UserUpdateDTO userUpdateDTO) {
+        UserDTO updatedUser = userService.partialUpdateUser(id, userUpdateDTO);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> findById(@PathVariable UUID id) {
         UserDTO user = userService.findById(id);
@@ -57,9 +77,10 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    @GetMapping("/find-email")
-    public ResponseEntity<UserDTO> findByEmail(@RequestParam("email") @Email String email) {
+    @GetMapping("/search")
+    public ResponseEntity<UserDTO> findByEmail(@RequestParam(name = "email") @Email String email) {
         UserDTO user = userService.findByEmail(email);
         return ResponseEntity.ok(user);
     }
+
 }
