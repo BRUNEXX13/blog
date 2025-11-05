@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import org.springframework.format.annotation.DateTimeFormat;
+import java.time.Instant;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -33,7 +34,10 @@ public record UserDTO(
     @Past(message = "Birth date must be in the past")
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-    LocalDate birthDate
+    LocalDate birthDate,
+
+    // For response only
+    Instant createdAt
 
 ) {
 
