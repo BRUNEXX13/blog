@@ -1,33 +1,45 @@
-package br.com.ss.blog.domain;
+package br.com.ss.blog.domain.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
-@Table
-@Entity(name = "users")
-public class UserDomain {
+@Entity
+@Table(name = "USERS")
+public class UserEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(updatable = false, nullable = false)
     private UUID id;
 
-    @Column(name = "first_name")
+    @NotBlank(message = "First name cannot be blank")
+    @Column(name = "FIRST_NAME", nullable = false)
     private String firstName;
 
-    @Column(name = "last_name")
+    @NotBlank(message = "Last name cannot be blank")
+    @Column(name = "LAST_NAME", nullable = false)
     private String lastName;
 
-    @Column(name = "email")
+    @NotBlank(message = "Email cannot be blank")
+    @Email(message = "Email should be valid")
+    @Column(name = "EMAIL", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "created_at", updatable = false, nullable = false)
+    @Column(name = "CREATED_AT", updatable = false, nullable = false)
+    @CreationTimestamp
     private Instant createdAt;
 
-    @Column(name = "birth_date")
+    @NotNull(message = "Birth date is required")
+    @Past(message = "Birth date must be in the past")
+    @Column(name = "BIRTH_DATE", nullable = false)
     private LocalDate birthDate;
 
     public UUID getId() {
@@ -78,17 +90,13 @@ public class UserDomain {
         this.birthDate = birthDate;
     }
 
-    public UserDomain(UUID id, String firstName, String lastName, String email, Instant createdAt, LocalDate birthDate) {
-        this.id = id;
+    public UserEntity(String firstName, String lastName, String email, LocalDate birthDate) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-        this.createdAt = createdAt;
         this.birthDate = birthDate;
     }
 
-    public UserDomain() {
-        this.id = UUID.randomUUID();
-        this.createdAt = Instant.now();
+    public UserEntity() {
     }
 }
