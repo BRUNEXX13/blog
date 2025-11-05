@@ -1,13 +1,15 @@
 package br.com.ss.blog.domain.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
 
 @Entity
-@Table(name = "usuarios")
+@Table(name = "users")
 public class UserEntity {
 
     @Id
@@ -23,20 +25,27 @@ public class UserEntity {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(name = "phone", nullable = false)
+    @NotNull
+    private String phone;
+
     @Column(name = "birth_date", nullable = false)
     private LocalDate birthDate;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    public UserEntity() {
-    }
 
-    public UserEntity(String firstName, String lastName, String email, LocalDate birthDate) {
+    public UserEntity(String firstName, String lastName, String email, String phone, LocalDate birthDate ) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+        this.phone = phone;
         this.birthDate = birthDate;
+    }
+
+    public UserEntity() {
+
     }
 
     @PrePersist
@@ -58,8 +67,25 @@ public class UserEntity {
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+
     public LocalDate getBirthDate() { return birthDate; }
     public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
 
     public Instant getCreatedAt() { return createdAt; }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserEntity)) return false;
+        UserEntity that = (UserEntity) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
 }

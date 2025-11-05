@@ -24,6 +24,9 @@ public record UserDTO(
         @Email(message = "Email should be valid")
         String email,
 
+        @NotBlank(message = "Phone cannot be empty")
+        String phone,
+
         @NotNull(message = "Birth date is required")
         @Past(message = "Birth date must be in the past")
         @DateTimeFormat(pattern = "dd/MM/yyyy")
