@@ -83,4 +83,11 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+
+    @GetMapping("/search/phone")
+    public ResponseEntity<UserDTO> findByPhone(@RequestParam(name = "phone") String phone) {
+        UserDTO user = userService.findByPhone(phone);
+        return ResponseEntity.ok(user);
+    }
+
 }

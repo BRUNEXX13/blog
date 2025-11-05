@@ -18,6 +18,8 @@ public record UserUpdateDTO(
     @Email(message = "If provided, email must be valid")
     String email,
 
+    String phone,
+
     @Past(message = "If provided, birth date must be in the past")
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")

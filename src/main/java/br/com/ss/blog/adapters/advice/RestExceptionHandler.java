@@ -2,6 +2,7 @@ package br.com.ss.blog.adapters.advice;
 
 import br.com.ss.blog.domain.exception.EmailAlreadyExistsException;
 import br.com.ss.blog.domain.exception.UserNotFoundException;
+import br.com.ss.blog.domain.exception.UserPhoneNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,11 +13,21 @@ import java.time.Instant;
 @RestControllerAdvice
 public class RestExceptionHandler {
 
+    private static final String TIMESTAMP = "timestamp";
+
     @ExceptionHandler(UserNotFoundException.class)
     public ProblemDetail handleUserNotFoundException(UserNotFoundException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         problemDetail.setTitle("User Not Found");
-        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty(TIMESTAMP, Instant.now());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(UserPhoneNotFoundException.class)
+    public ProblemDetail handleUserNotPhoneFoundException(UserPhoneNotFoundException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        problemDetail.setTitle("User Not Found");
+        problemDetail.setProperty(TIMESTAMP , Instant.now());
         return problemDetail;
     }
 
@@ -24,7 +35,7 @@ public class RestExceptionHandler {
     public ProblemDetail handleEmailAlreadyExistsException(EmailAlreadyExistsException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
         problemDetail.setTitle("Email Already In Use");
-        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty(TIMESTAMP, Instant.now());
         return problemDetail;
     }
 

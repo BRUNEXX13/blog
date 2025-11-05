@@ -5,6 +5,7 @@ import br.com.ss.blog.domain.dto.UserDTO;
 import br.com.ss.blog.domain.dto.UserUpdateDTO;
 import br.com.ss.blog.domain.entity.UserEntity;
 import br.com.ss.blog.domain.exception.EmailAlreadyExistsException;
+import br.com.ss.blog.domain.exception.UserPhoneNotFoundException;
 import br.com.ss.blog.infra.cache.CacheNames;
 import br.com.ss.blog.domain.exception.UserNotFoundException;
 import br.com.ss.blog.domain.mapper.UserMapper;
@@ -46,7 +47,7 @@ public class UserService {
     @Transactional
     @CacheEvict(value = CacheNames.USERS, allEntries = true)
     public UserDTO createUser(@Valid @NotNull UserDTO dto) {
-     //   Objects.requireNonNull(dto, "UserDTO must not be null");
+        Objects.requireNonNull(dto, "UserDTO must not be null");
 
         if (userRepository.existsByEmail(dto.email())) {
             throw new EmailAlreadyExistsException(dto.email());
@@ -75,6 +76,7 @@ public class UserService {
         existingUser.setFirstName(dto.firstName());
         existingUser.setLastName(dto.lastName());
         existingUser.setEmail(dto.email());
+        existingUser.setPhone(dto.phone());
         existingUser.setBirthDate(dto.birthDate());
         // id e createdAt não são atualizados via DTO
 
@@ -94,6 +96,7 @@ public class UserService {
         updateIfValid(dto.firstName(), existingUser::setFirstName);
         updateIfValid(dto.lastName(), existingUser::setLastName);
         updateEmailIfValid(dto.email(), existingUser);
+        updateIfValid(dto.phone(), existingUser::setPhone);
         updateIfNotNull(dto.birthDate(), existingUser::setBirthDate);
 
         UserEntity updatedUser = userRepository.save(existingUser);
@@ -111,9 +114,6 @@ public class UserService {
         userRepository.deleteById(id);
         log.info("User with ID {} deleted successfully", id);
     }
-
-
-
 
     @Transactional(readOnly = true)
     @Cacheable(value = CacheNames.USERS, key = "#id") // Usa o nome versionado
@@ -160,6 +160,19 @@ public class UserService {
                 .orElseThrow(() -> {
                     log.warn("User not found with email: {}", email);
                     return new UserNotFoundException(email);
+                });
+    }
+
+
+    @Transactional(readOnly = true)
+    @Cacheable(value = CacheNames.USERS, key = "#phone") // Usa o nome versionado
+    public UserDTO findByPhone(@NotNull String phone) {
+        log.debug("Attempting to find user by phone: {}", phone);
+        return userRepository.findByEmail(phone)
+                .map(userMapper::toDto)
+                .orElseThrow(() -> {
+                    log.warn("User not found with phone: {}", phone);
+                    return new UserPhoneNotFoundException(phone);
                 });
     }
 
