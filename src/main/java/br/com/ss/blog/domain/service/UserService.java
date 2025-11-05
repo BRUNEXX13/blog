@@ -11,6 +11,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -39,7 +41,8 @@ public class UserService {
     }
 
     @Transactional
-    public UserDTO createUser(@Valid @NotNull UserDTO dto) throws EmailAlreadyExistsException {
+    @CacheEvict(value = "users", allEntries = true)
+    public UserDTO createUser(@Valid @NotNull UserDTO dto) {
         Objects.requireNonNull(dto, "UserDTO must not be null");
 
         if (userRepository.existsByEmail(dto.email())) {
@@ -54,7 +57,8 @@ public class UserService {
 
 
     @Transactional(readOnly = true)
-    public UserDTO findById(UUID id) {
+    @Cacheable(value = "users", key = "#id")
+    public UserDTO findById(@NotNull UUID id) {
         log.debug("Attempting to find user by ID: {}", id);
         return userRepository.findById(id)
                 .map(userMapper::toDto)
@@ -65,7 +69,8 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public Page<UserDTO> findAll(Pageable pageable) {
+    @Cacheable(value = "users", key = "#pageable")
+    public Page<UserDTO> findAll(@NotNull Pageable pageable) {
         log.info("Fetching users with pagination: {}", pageable);
         Page<UserEntity> userPage = userRepository.findAll(pageable);
         return userPage.map(userMapper::toDto);
@@ -88,7 +93,8 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserDTO findByEmail(@Email String email) {
+    @Cacheable(value = "users", key = "#email")
+    public UserDTO findByEmail(@Email @NotNull String email) {
         log.debug("Attempting to find user by email: {}", email);
         return userRepository.findByEmail(email)
                 .map(userMapper::toDto)
