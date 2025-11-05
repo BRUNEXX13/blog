@@ -10,11 +10,11 @@ services:
       - POSTGRES_USER=bloguser
       - POSTGRES_PASSWORD=blogpassword
     ports:
-      - "5432:5432"
+      - "5432:5432" # Expõe a porta para a máquina host
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data # Persiste os dados do banco
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 10s
       timeout: 5s
       retries: 5

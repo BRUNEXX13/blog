@@ -46,7 +46,7 @@ public class UserService {
     @Transactional
     @CacheEvict(value = CacheNames.USERS, allEntries = true)
     public UserDTO createUser(@Valid @NotNull UserDTO dto) {
-        Objects.requireNonNull(dto, "UserDTO must not be null");
+     //   Objects.requireNonNull(dto, "UserDTO must not be null");
 
         if (userRepository.existsByEmail(dto.email())) {
             throw new EmailAlreadyExistsException(dto.email());
