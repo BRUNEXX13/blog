@@ -2,26 +2,27 @@ package br.com.ss.blog.domain.service;
 
 import br.com.ss.blog.adapters.repository.UserRepository;
 import br.com.ss.blog.domain.dto.UserDTO;
-import br.com.ss.blog.domain.exception.EmailAlreadyExistsException;
 import br.com.ss.blog.domain.entity.UserEntity;
+import br.com.ss.blog.domain.exception.EmailAlreadyExistsException;
 import br.com.ss.blog.domain.exception.UserNotFoundException;
 import br.com.ss.blog.domain.mapper.UserMapper;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.LocalTime;
 
 @Service
 public class UserService {
@@ -64,12 +65,10 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserDTO> findAll() {
-        log.info("Fetching all users");
-        List<UserEntity> users = userRepository.findAll();
-        return users.stream()
-                .map(userMapper::toDto)
-                .toList();
+    public Page<UserDTO> findAll(Pageable pageable) {
+        log.info("Fetching users with pagination: {}", pageable);
+        Page<UserEntity> userPage = userRepository.findAll(pageable);
+        return userPage.map(userMapper::toDto);
     }
 
     @Transactional(readOnly = true)

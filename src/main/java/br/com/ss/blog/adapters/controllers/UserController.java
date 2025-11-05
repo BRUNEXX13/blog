@@ -1,11 +1,14 @@
 package br.com.ss.blog.adapters.controllers;
 
 import br.com.ss.blog.domain.dto.UserDTO;
+import br.com.ss.blog.infra.config.pageable.PaginatedResponse;
 import br.com.ss.blog.domain.service.UserService;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,9 +40,15 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserDTO>> findAll() {
-        List<UserDTO> users = userService.findAll();
-        return ResponseEntity.ok(users);
+    public ResponseEntity<PaginatedResponse<UserDTO>> findAll(Pageable pageable) {
+        Page<UserDTO> usersPage = userService.findAll(pageable);
+        PaginatedResponse<UserDTO> response = new PaginatedResponse<>(
+                usersPage.getContent(),
+                usersPage.getNumber(),
+                usersPage.getTotalElements(),
+                usersPage.getTotalPages()
+        );
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/created-at")
