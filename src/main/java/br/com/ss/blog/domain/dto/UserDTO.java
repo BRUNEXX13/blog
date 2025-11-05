@@ -24,6 +24,15 @@ public record UserDTO(
         @Email(message = "Email should be valid")
         String email,
 
+        @NotBlank(message = "Username cannot be empty")
+        String username,
+
+        @NotBlank(message = "Password cannot be empty")
+        String password,
+
+        @NotBlank(message = "Role cannot be empty")
+        String role,
+
         @NotBlank(message = "Phone cannot be empty")
         String phone,
 

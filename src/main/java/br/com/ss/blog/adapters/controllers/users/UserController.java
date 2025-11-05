@@ -1,15 +1,14 @@
-package br.com.ss.blog.adapters.controllers;
+package br.com.ss.blog.adapters.controllers.users;
 
 import br.com.ss.blog.domain.dto.UserDTO;
 import br.com.ss.blog.domain.dto.UserUpdateDTO;
-import br.com.ss.blog.infra.pageable.PaginatedResponse;
 import br.com.ss.blog.domain.service.UserService;
-import jakarta.validation.constraints.Email;
+import br.com.ss.blog.infra.pageable.PaginatedResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -59,15 +58,9 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @GetMapping
+    @GetMapping("/findAll")
     public ResponseEntity<PaginatedResponse<UserDTO>> findAll(Pageable pageable) {
-        Page<UserDTO> usersPage = userService.findAll(pageable);
-        PaginatedResponse<UserDTO> response = new PaginatedResponse<>(
-                usersPage.getContent(),
-                usersPage.getNumber(),
-                usersPage.getTotalElements(),
-                usersPage.getTotalPages()
-        );
+        PaginatedResponse<UserDTO> response = userService.findAll(pageable);
         return ResponseEntity.ok(response);
     }
 

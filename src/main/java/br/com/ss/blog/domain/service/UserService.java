@@ -9,6 +9,7 @@ import br.com.ss.blog.domain.exception.UserPhoneNotFoundException;
 import br.com.ss.blog.infra.cache.CacheNames;
 import br.com.ss.blog.domain.exception.UserNotFoundException;
 import br.com.ss.blog.domain.mapper.UserMapper;
+import br.com.ss.blog.infra.pageable.PaginatedResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -60,7 +61,7 @@ public class UserService {
     }
 
     @Transactional
-    @CacheEvict(value = CacheNames.USERS, allEntries = true) // Invalida todo o cache 'users' para garantir consistência
+    @CacheEvict(value = CacheNames.USERS, allEntries = true)
     public UserDTO updateUser(@NotNull UUID id, @Valid @NotNull UserDTO dto) {
         Objects.requireNonNull(dto, "UserDTO must not be null for update");
 
@@ -128,11 +129,16 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(value = CacheNames.USERS, key = "#pageable") // Usa o nome versionado
-    public Page<UserDTO> findAll(@NotNull Pageable pageable) {
+    public PaginatedResponse<UserDTO> findAll(@NotNull Pageable pageable) {
         log.info("Fetching users with pagination: {}", pageable);
         Page<UserEntity> userPage = userRepository.findAll(pageable);
-        return userPage.map(userMapper::toDto);
+        List<UserDTO> content = userPage.map(userMapper::toDto).getContent();
+        return new PaginatedResponse<>(
+                content,
+                userPage.getNumber(),
+                userPage.getTotalElements(),
+                userPage.getTotalPages()
+        );
     }
 
     @Transactional(readOnly = true)
@@ -168,7 +174,7 @@ public class UserService {
     @Cacheable(value = CacheNames.USERS, key = "#phone") // Usa o nome versionado
     public UserDTO findByPhone(@NotNull String phone) {
         log.debug("Attempting to find user by phone: {}", phone);
-        return userRepository.findByEmail(phone)
+        return userRepository.findFirstByPhone(phone)
                 .map(userMapper::toDto)
                 .orElseThrow(() -> {
                     log.warn("User not found with phone: {}", phone);
