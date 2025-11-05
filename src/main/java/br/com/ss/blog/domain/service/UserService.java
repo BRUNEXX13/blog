@@ -37,11 +37,13 @@ public class UserService {
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
+    private final UserPasswordService userPasswordService;
     private final UserMapper userMapper;
 
 
-    public UserService(UserRepository userRepository, UserMapper userMapper) {
+    public UserService(UserRepository userRepository, UserPasswordService userPasswordService, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userPasswordService = userPasswordService;
         this.userMapper = userMapper;
     }
 
@@ -55,6 +57,7 @@ public class UserService {
         }
 
         UserEntity entity = userMapper.toEntity(dto);
+        entity.setPassword(userPasswordService.encodePassword(dto.password(), null));
         UserEntity saved = userRepository.save(entity);
         log.info("User created successfully with ID {}", saved.getId());
         return userMapper.toDto(saved);

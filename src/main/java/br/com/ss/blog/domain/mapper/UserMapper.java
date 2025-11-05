@@ -12,6 +12,7 @@ public interface UserMapper {
     /**
      * Converts a UserEntity to a UserDTO.
      */
+
     UserDTO toDto(UserEntity entity);
 
     /**
@@ -21,5 +22,6 @@ public interface UserMapper {
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "role", ignore = true, defaultValue = "USER")
     UserEntity toEntity(UserDTO dto);
 }
