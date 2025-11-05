@@ -1,5 +1,5 @@
 // java
-package br.com.ss.blog.infra.config.jackson;
+package br.com.ss.blog.infra.jackson;
 
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;

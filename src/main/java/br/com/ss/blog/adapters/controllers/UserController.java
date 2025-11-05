@@ -1,7 +1,7 @@
 package br.com.ss.blog.adapters.controllers;
 
 import br.com.ss.blog.domain.dto.UserDTO;
-import br.com.ss.blog.infra.config.pageable.PaginatedResponse;
+import br.com.ss.blog.infra.pageable.PaginatedResponse;
 import br.com.ss.blog.domain.service.UserService;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.Valid;

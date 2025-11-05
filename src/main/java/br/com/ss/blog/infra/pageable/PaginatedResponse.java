@@ -1,4 +1,4 @@
-package br.com.ss.blog.infra.config.pageable;
+package br.com.ss.blog.infra.pageable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

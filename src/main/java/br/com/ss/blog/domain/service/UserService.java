@@ -4,6 +4,7 @@ import br.com.ss.blog.adapters.repository.UserRepository;
 import br.com.ss.blog.domain.dto.UserDTO;
 import br.com.ss.blog.domain.entity.UserEntity;
 import br.com.ss.blog.domain.exception.EmailAlreadyExistsException;
+import br.com.ss.blog.infra.cache.CacheNames;
 import br.com.ss.blog.domain.exception.UserNotFoundException;
 import br.com.ss.blog.domain.mapper.UserMapper;
 import jakarta.validation.Valid;
@@ -41,7 +42,7 @@ public class UserService {
     }
 
     @Transactional
-    @CacheEvict(value = "users", allEntries = true)
+    @CacheEvict(value = CacheNames.USERS, allEntries = true)
     public UserDTO createUser(@Valid @NotNull UserDTO dto) {
         Objects.requireNonNull(dto, "UserDTO must not be null");
 
@@ -57,7 +58,7 @@ public class UserService {
 
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "users", key = "#id")
+    @Cacheable(value = CacheNames.USERS, key = "#id") // Usa o nome versionado
     public UserDTO findById(@NotNull UUID id) {
         log.debug("Attempting to find user by ID: {}", id);
         return userRepository.findById(id)
@@ -69,7 +70,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "users", key = "#pageable")
+    @Cacheable(value = CacheNames.USERS, key = "#pageable") // Usa o nome versionado
     public Page<UserDTO> findAll(@NotNull Pageable pageable) {
         log.info("Fetching users with pagination: {}", pageable);
         Page<UserEntity> userPage = userRepository.findAll(pageable);
@@ -93,7 +94,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "users", key = "#email")
+    @Cacheable(value = CacheNames.USERS, key = "#email") // Usa o nome versionado
     public UserDTO findByEmail(@Email @NotNull String email) {
         log.debug("Attempting to find user by email: {}", email);
         return userRepository.findByEmail(email)
