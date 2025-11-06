@@ -51,7 +51,6 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> findById(@PathVariable UUID id) {
         UserDTO user = userService.findById(id);
@@ -75,7 +74,6 @@ public class UserController {
         UserDTO user = userService.findByEmail(email);
         return ResponseEntity.ok(user);
     }
-
 
     @GetMapping("/search/phone")
     public ResponseEntity<UserDTO> findByPhone(@RequestParam(name = "phone") String phone) {
